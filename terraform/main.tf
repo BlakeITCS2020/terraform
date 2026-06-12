@@ -293,6 +293,22 @@ resource "aws_iam_role_policy" "glue_s3_access" {
 
 #-------------------- Redshift Infrastructure ----------------------
 
+
+data "aws_secretsmanager_secret" "redshift" {
+  name = "redshift!redshift-cluster-1-awsuser"
+}
+
+data "aws_secretsmanager_secret_version" "redshift" {
+  secret_id = data.aws_secretsmanager_secret.redshift.id
+}
+
+locals {
+  redshift_secret = jsondecode(
+    data.aws_secretsmanager_secret_version.redshift.secret_string
+  )
+}
+
+
 # Create security group for Redshift access
 resource "aws_security_group" "redshift_security_group" {
   name        = "redshift-sg-${var.environment}"
